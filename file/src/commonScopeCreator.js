@@ -1,6 +1,0 @@
-commonScope = {
-  common: {
-    lastPage : '/#/',
-    lastPagePermitted: '/#/',
-  }
-};
