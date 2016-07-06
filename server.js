@@ -30,7 +30,7 @@ server = function () {
       });
     };
     server = http.createServer(onRequest);
-    server.listen(8082);
+    server.listen(80);
   };
 
   return {init: init};
