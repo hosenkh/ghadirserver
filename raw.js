@@ -23,7 +23,7 @@ net.createServer(function(socket) {
       userId = requestData[0].split('=')[1];
       deviceId = requestData[1].split('=')[1];
       mainChar = '';
-      timeout = 1;
+      timeout = 2000;
       cStatus = true;
       phCreateInstance = phantom.create()
           .then(instance => {
@@ -71,8 +71,14 @@ net.createServer(function(socket) {
                   buf = new Buffer(b, 'base64');
                   decoded = bmp.decode(buf);
                   // console.log(decoded);
-                  rawArray = JSON.parse(JSON.stringify(decoded)).data.data;
-                  cutIndex = 0;
+                  // rawArray= JSON.parse(JSON.stringify(decoded)).data.data;
+                  rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+,\d+,\d+),255/g, "$1");
+                  // fs.writeFile('array.txt', rawPixels, function(err) {
+                    // if (err) {
+                      // console.log(err);
+                    // }
+                  // });
+                  // cutIndex = 0;
                   // for (var i in rawArray) {
                   //   if (fourIndex == 4) {
                   //     fourIndex= 0;
@@ -83,17 +89,17 @@ net.createServer(function(socket) {
                   //   }
                   //   fourIndex ++;
                   // }
-                  cutIndex = 0;
+                  // cutIndex = 0;
                   // console.log(rawText.slice(1,rawText.length-1));
-                  return rawArray;
+                  return rawPixels;
               }).catch(error => {
                   if (error) {
                     console.log(error);
                     phInstance.exit();
                   }
               });
-              phExport = phPixel.then(rawArray => {
-                console.log(rawArray.length);
+              phExport = phPixel.then(rawPixels => {
+              socket.write(rawPixels);
                 if (cStatus) {
                   loop();
                 }

@@ -1,4 +1,5 @@
 crypto = require('./encripter');
+fileLoader = require('./fileLoader');
 querystring = require('querystring');
 databaseHandler = require('./databaseHandler');
 
@@ -30,10 +31,13 @@ queryParser = function (query) {
 
 
 main = function (response, address, cookies) {
-  console.log(address);
-  response.end('<style>* {margin: 0; padding: 0}</style><div style="color: red; background-color:red; font-size: 70px; width: 320px; height: 240px"></div><div style="top:0; left:0; height:1px; width: 2px; background-color: purple; position: absolute"></div>');
-  // response.end('<style>* {margin: 0; padding: 0}</style>');
+  var tempPath = address;
+  if (tempPath === '/') {
+    tempPath += 'index.html';
+  }
+  fileLoader.load(response, '',tempPath, cookies);
 };
+
 
 db = function (response, address, queryOptions, method, cookies, postData) {
   username = userDecryptor(cookies);
