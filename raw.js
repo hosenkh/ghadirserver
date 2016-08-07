@@ -29,7 +29,7 @@ net.createServer(function(socket) {
           .then(instance => {
               phInstance = instance;
               return instance.createPage();
-          }).catch(error => {
+          }).catch(function(error){
               if (error) {
                 console.log(error);
                 phInstance.exit();
@@ -39,7 +39,7 @@ net.createServer(function(socket) {
               sitepage = page;
               sitepage.property('viewportSize', {width: 320, height: 240});
               return page.open('http://localhost/?userId='+userId+'&deviceId='+deviceId);
-          }).catch(error => {
+          }).catch(function(error){
               if (error) {
                 console.log(error);
                 phInstance.exit();
@@ -48,7 +48,7 @@ net.createServer(function(socket) {
         phGetStatus = phOpenPage.then(status => {
               console.log(status);
               return sitepage.property('content');
-          }).catch(error => {
+          }).catch(function(error){
               if (error) {
                 console.log(error);
                 phInstance.exit();
@@ -57,63 +57,82 @@ net.createServer(function(socket) {
       loop = function(){
         setTimeout(
           function() {
-            phRender = phGetStatus.then(content => {
-                  // sitepage.render('test.bmp');
-                  b = sitepage.renderBase64('BMP');
-                  return b;
-              }).catch(error => {
-                  if (error) {
-                    console.log(error);
-                    phInstance.exit();
-                  }
-              });
-            phPixel = phRender.then(b => {
-                  buf = new Buffer(b, 'base64');
-                  decoded = bmp.decode(buf);
-                  // console.log(decoded);
-                  // rawArray= JSON.parse(JSON.stringify(decoded)).data.data;
-                  rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+,\d+,\d+),255/g, "$1");
-                  // fs.writeFile('array.txt', rawPixels, function(err) {
-                    // if (err) {
-                      // console.log(err);
+            if (cStatus) {
+              phRender = phGetStatus.then(content => {
+                    // sitepage.render('test.bmp');
+                    b = sitepage.renderBase64('BMP');
+                    return b;
+                }).catch(function(error){
+                    if (error) {
+                      console.log(error);
+                      phInstance.exit();
+                    }
+                });
+              phPixel = phRender.then(b => {
+                    buf = new Buffer(b, 'base64');
+                    decoded = bmp.decode(buf);
+                    hexer = function (x,shift) {
+                      var num = parseInt(x);
+                      var shiftedNum;
+                      switch (shift) {
+                        case 11:
+                          shiftedNum = (num*249+1014) >> 11;
+                        break;
+                        case 10:
+                          shiftedNum = (num*253+505) >> 10;
+                        break;
+                      }
+                      return shiftedNum.toString(16);
+                    };
+                    // console.log(decoded);
+                    // rawArray= JSON.parse(JSON.stringify(decoded)).data.data;
+                    rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+),(\d+),(\d+),255/g, function(a,b,c,d){return "0x"+hexer(b,11)+hexer(c,10)+hexer(d,11);});
+                    fs.writeFile('array.txt', rawPixels, function(err) {
+                      if (err) {
+                        console.log(err);
+                      }
+                    });
+                    // cutIndex = 0;
+                    // for (var i in rawArray) {
+                    //   if (fourIndex == 4) {
+                    //     fourIndex= 0;
+                    //   }
+                    //   if (fourIndex == 3) {
+                    //     rawArray.splice(i-cutIndex, 1);
+                    //     cutIndex ++;
+                    //   }
+                    //   fourIndex ++;
                     // }
-                  // });
-                  // cutIndex = 0;
-                  // for (var i in rawArray) {
-                  //   if (fourIndex == 4) {
-                  //     fourIndex= 0;
-                  //   }
-                  //   if (fourIndex == 3) {
-                  //     rawArray.splice(i-cutIndex, 1);
-                  //     cutIndex ++;
-                  //   }
-                  //   fourIndex ++;
-                  // }
-                  // cutIndex = 0;
-                  // console.log(rawText.slice(1,rawText.length-1));
-                  return rawPixels;
-              }).catch(error => {
-                  if (error) {
-                    console.log(error);
-                    phInstance.exit();
-                  }
-              });
-              phExport = phPixel.then(rawPixels => {
-              socket.write(rawPixels);
-                if (cStatus) {
-                  loop();
+                    // cutIndex = 0;
+                    // console.log(rawText.slice(1,rawText.length-1));
+                    return rawPixels;
+                }).catch(function(error){
+                    if (error) {
+                      console.log(error);
+                      phInstance.exit();
+                    }
+                });
+                phExport = phPixel.then(rawPixels => {
+                try {socket.write(rawPixels);}
+                catch (err){
+                  console.log(err);
                 }
-                  // fs.writeFile('buf.txt', JSON.stringify(rawArray), function(err) {
-                  //   if (err) {
-                  //     console.log(err);
-                  //   }
-                  // });
-              }).catch(error => {
-                  if (error) {
-                    console.log(error);
-                    phInstance.exit();
+                  if (cStatus) {
+                    loop();
                   }
-              });
+                    // fs.writeFile('buf.txt', JSON.stringify(rawArray), function(err) {
+                    //   if (err) {
+                    //     console.log(err);
+                    //   }
+                    // });
+                }).catch(function(error){
+                    if (error) {
+                      console.log(error);
+                      phInstance.exit();
+                    }
+                });
+            }
+            
             
             
           },timeout);
@@ -127,7 +146,7 @@ net.createServer(function(socket) {
           console.log(meParam);
           phGetStatus.then(content => {
               sitepage.sendEvent(meParam[0], meParam[1], meParam[2]);
-          }).catch(error => {
+          }).catch(function(error){
               if (error) {
                 console.log(error);
                 phInstance.exit();
@@ -148,7 +167,7 @@ net.createServer(function(socket) {
       phExport.then(() => {
         sitepage.close();
         phInstance.exit();
-      }).catch(error => {
+      }).catch(function(error){
           if (error) {
             console.log(error);
             phInstance.exit();
