@@ -9,6 +9,7 @@ phInstance = null;
 var cStatus;
 net.createServer(function(socket) {
   console.log('connected '+ socket.remoteAddress);
+  socket.on('error', function(error) {console.log(error);});
   socket.on('data', function(data) {
     // console.log(JSON.stringify(data));
     mainData = JSON.parse(JSON.stringify(data)).data;
