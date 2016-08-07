@@ -87,11 +87,11 @@ net.createServer(function(socket) {
                     // console.log(decoded);
                     // rawArray= JSON.parse(JSON.stringify(decoded)).data.data;
                     rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+),(\d+),(\d+),255/g, function(a,b,c,d){return "0x"+hexer(b,11)+hexer(c,10)+hexer(d,11);});
-                    fs.writeFile('array.txt', rawPixels, function(err) {
-                      if (err) {
-                        console.log(err);
-                      }
-                    });
+                    // fs.writeFile('array.txt', rawPixels, function(err) {
+                    //   if (err) {
+                    //     console.log(err);
+                    //   }
+                    // });
                     // cutIndex = 0;
                     // for (var i in rawArray) {
                     //   if (fourIndex == 4) {
