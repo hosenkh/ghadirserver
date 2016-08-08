@@ -72,27 +72,33 @@ net.createServer(function(socket) {
               phPixel = phRender.then(b => {
                     buf = new Buffer(b, 'base64');
                     decoded = bmp.decode(buf);
-                    hexer = function (x,shift) {
-                      var num = parseInt(x);
-                      var shiftedNum;
-                      switch (shift) {
-                        case 11:
-                          shiftedNum = (num*249+1014) >> 11;
+                    hexer = function (a,b,c) {
+                      var r = parseInt(a);
+                      var g = parseInt(b);
+                      var b = parseInt(c);
+                      sum = (r&0x1f) << 11 | (g&0x3f) << 5 | (b&0x1f) << 0;
+                      sum = sum.toString(16);
+                      switch (sum.length) {
+                        case 1:
+                          sum = "000" + sum;
                         break;
-                        case 10:
-                          shiftedNum = (num*253+505) >> 10;
+                        case 2:
+                          sum = "00" + sum;
+                        break;
+                        case 3:
+                          sum = "0" + sum;
                         break;
                       }
-                      return shiftedNum.toString(16);
+                      return sum;
                     };
                     // console.log(decoded);
                     // rawArray= JSON.parse(JSON.stringify(decoded)).data.data;
-                    rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+),(\d+),(\d+),255/g, function(a,b,c,d){return "0x"+hexer(b,11)+hexer(c,10)+hexer(d,11);});
-                    // fs.writeFile('array.txt', rawPixels, function(err) {
-                    //   if (err) {
-                    //     console.log(err);
-                    //   }
-                    // });
+                    rawPixels= JSON.stringify(decoded).split("[")[1].split("]")[0].replace(/(\d+),(\d+),(\d+),255/g, function(a,b,c,d){return "0x"+hexer(b,c,d);});
+                    fs.writeFile('array.txt', rawPixels, function(err) {
+                      if (err) {
+                        console.log(err);
+                      }
+                    });
                     // cutIndex = 0;
                     // for (var i in rawArray) {
                     //   if (fourIndex == 4) {
