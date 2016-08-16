@@ -48,6 +48,7 @@ net.createServer(function(socket) {
           });
         phGetStatus = phOpenPage.then(status => {
               console.log(status);
+              // sitepage.onConsoleMessage()
               return sitepage.property('content');
           }).catch(function(error){
               if (error) {
